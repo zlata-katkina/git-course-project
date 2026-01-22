@@ -38,6 +38,14 @@ public class Journal {
                 case "list":
                     listEntries();
                     break;
+                case "search":
+                    if (args.length < 2) {
+                        System.out.println("Ошибка: для команды 'search' нужен поисковый запрос.");
+                        return;
+                    }
+                    String query = Stream.of(args).skip(1).collect(Collectors.joining(" "));
+                    searchEntries(query);
+                    break;
                 default:
                     System.out.println("Неизвестная команда: " + command);
             }
@@ -67,6 +75,24 @@ public class Journal {
         // Логика поиска реализуется в отдельной команде search
         System.out.println("-----------------------");
         return lines;
+    }
+    public static List<String> searchEntries(String query) throws IOException {
+        Path path = Paths.get(JOURNAL_FILE);
+
+        if (!Files.exists(path)) {
+            System.out.println("Дневник пуст.");
+            return Collections.emptyList();
+        }
+        List<String> lines = Files.readAllLines(path, StandardCharsets.UTF_8);
+        System.out.println("--- Результаты поиска ---");
+        List<String> result = lines.stream()
+                .filter(line -> line.contains(query))
+                .collect(Collectors.toList());
+
+        result.forEach(System.out::println);
+        System.out.println("-------------------------");
+
+        return result;
     }
 
     public static void rotateLogs() {
